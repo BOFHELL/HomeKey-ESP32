@@ -81,7 +81,7 @@
     "valarray": "cpp"
   },
   "idf.flashType": "UART",
-  "idf.port": "/dev/ttyACM0",
+  "idf.port": "/dev/tty.usbserial-0001",
   "idf.openOcdConfigs": [
     "interface/ftdi/esp32_devkitj_v1.cfg",
     "target/esp32.cfg"

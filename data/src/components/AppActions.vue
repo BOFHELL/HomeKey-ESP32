@@ -346,6 +346,186 @@
                 </div>
               </div>
             </div>
+            <!-- Neuer Tab ws2813 -->
+            <label class="tab">
+              <input type="radio" name="action_tabs" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 2v6M12 22v-6M4.2 7.8l4.2 2.4M15.6 17.8l4.2-2.4M4.2 16.2l4.2-2.4M15.6 6.2l4.2 2.4" />
+              </svg>
+              WS2813
+            </label>
+            <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+              <div class="space-y-4">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">GPIO Pin</span>
+                  </label>
+                  <input type="number" v-model.number="actionsConfig.ws2813Pin" placeholder="GPIO Pin"
+                    class="input input-bordered w-full" />
+                </div>
+
+                <!-- Anzahl LEDs -->
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Number of LEDs</span>
+                  </label>
+                  <input type="number" v-model.number="actionsConfig.ws2813NumLeds" min="1" max="255" placeholder="24"
+                    class="input input-bordered w-full" />
+                </div>
+
+                <div class="divider">Colors</div>
+
+                <div class="flex max-md:flex-col max-md:gap-8">
+                  <div class="flex-1">
+                    <h3 class="text-base md:text-md font-bold mb-2">Auth Success</h3>
+                    <div class="flex gap-2 mb-2">
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">R</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[0]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">G</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[1]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">B</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[2]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                    </div>
+                    <div class="form-control">
+                      <label class="label"><span class="label-text">Effect</span></label>
+                      <select v-model="actionsConfig.ws2813SuccessEffect" class="select select-bordered w-full">
+                        <option value="on">an</option>
+                        <option value="off">aus</option>
+                        <option value="glow">glow</option>
+                        <option value="puls">puls</option>
+                        <option value="rainbow">rainbow</option>
+                        <option value="moving_spots">moving_spots</option>
+                      </select>
+                    </div>
+
+                    <!-- Preview Strip: Auth Success -->
+                    <div class="mt-3">
+                      <label class="label"><span class="label-text">Preview</span></label>
+                      <div class="w-full h-8 flex gap-1 items-center">
+                        <div v-for="(color, idx) in wsSuccessPreview" :key="'ws-s-'+idx"
+                             :style="{ backgroundColor: color }"
+                             class="flex-1 h-6 rounded-sm border border-base-300"></div>
+                      </div>
+                      <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline" @click="sendPreview('success')">
+                          Live Preview
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+<div class="divider md:divider-horizontal max-md:hidden"></div>
+                  <div class="flex-1">
+                    <h3 class="text-base md:text-md font-bold mb-2">Auth Failure</h3>
+                    <div class="flex gap-2 mb-2">
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">R</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813FailureColor[0]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">G</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813FailureColor[1]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">B</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813FailureColor[2]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                    </div>
+                    <div class="form-control">
+                      <label class="label"><span class="label-text">Effect</span></label>
+                      <select v-model="actionsConfig.ws2813FailureEffect" class="select select-bordered w-full">
+                        <option value="on">an</option>
+                        <option value="off">aus</option>
+                        <option value="glow">glow</option>
+                        <option value="puls">puls</option>
+                      </select>
+                    </div>
+
+                    <!-- Preview Strip: Auth Failure -->
+                    <div class="mt-3">
+                      <label class="label"><span class="label-text">Preview</span></label>
+                      <div class="w-full h-8 flex gap-1 items-center">
+                        <div v-for="(color, idx) in wsFailurePreview" :key="'ws-f-'+idx"
+                             :style="{ backgroundColor: color }"
+                             class="flex-1 h-6 rounded-sm border border-base-300"></div>
+                      </div>
+                      <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline" @click="sendPreview('failure')">
+                          Live Preview
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="divider">Ambientlight Settings</div>
+                <div class="flex max-md:flex-col max-md:gap-8">
+                  <div>
+                    <h3 class="text-base md:text-md font-bold mb-2">Ambient Lighting</h3>
+                    <div class="flex gap-2 mb-2">
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">R</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[0]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">G</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[1]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                      <div class="form-control">
+                        <label class="label"><span class="label-text">B</span></label>
+                        <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[2]" min="0" max="255"
+                          class="input input-bordered w-24" />
+                      </div>
+                    </div>
+                    <div class="form-control">
+                      <label class="label"><span class="label-text">Brightness %</span></label>
+                      <input type="range" v-model.number="actionsConfig.ws2813AmbientBrightness" min="0" max="100"
+                        class="range"
+                         :style="{
+                            background: `linear-gradient(to right,
+                              rgb(0,0,0),
+                              rgb(${actionsConfig.ws2813AmbientColor[0]},
+                                  ${actionsConfig.ws2813AmbientColor[1]},
+                                  ${actionsConfig.ws2813AmbientColor[2]}))`
+                          }"
+                      /> <!-- /range - Dynamic background color -->
+                      <div class="text-sm mt-1">Helligkeit: {{ actionsConfig.ws2813AmbientBrightness }}</div>
+                    </div>
+
+                    <!-- Preview Strip: Ambient -->
+                    <div class="mt-3">
+                      <label class="label"><span class="label-text">Ambient Preview</span></label>
+                      <div class="w-full h-8 flex gap-1 items-center">
+                        <div v-for="(color, idx) in wsAmbientPreview" :key="'ws-a-'+idx"
+                             :style="{ backgroundColor: color }"
+                             class="flex-1 h-6 rounded-sm border border-base-300"></div>
+                      </div>
+                      <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline" @click="sendPreview('ambient')">
+                          Live Preview
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Ende ws2813 Tab -->
+
           </div>
         </div>
       </div>
@@ -358,7 +538,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { fetchConfig, saveConfig } from '../services/api';
 
 export default {
@@ -371,6 +551,15 @@ export default {
       neopixelFailTime: 1000, // Corrected naming
       neopixelSuccessColor: [255, 255, 255],
       neopixelFailureColor: [255, 0, 0],
+      // ws2813 specific defaults
+      ws2813Pin: 255,
+      ws2813NumLeds: 24,
+      ws2813SuccessColor: [255, 255, 255],
+      ws2813FailureColor: [255, 0, 0],
+      ws2813AmbientColor: [50, 50, 50],
+      ws2813AmbientBrightness: 128,
+      ws2813SuccessEffect: 'on',
+      ws2813FailureEffect: 'on',
       // Simple GPIO fields - mapped from NFC API names
       nfcSuccessPin: 2,
       nfcSuccessTime: 1000,
@@ -438,10 +627,217 @@ export default {
     const error = ref(null);
     let originalActionsConfig = {};
 
+    // Preview state
+    const SEGMENTS = 24;
+    const wsSuccessPreview = ref(Array.from({ length: SEGMENTS }).map(() => 'rgb(0,0,0)'));
+    const wsFailurePreview = ref(Array.from({ length: SEGMENTS }).map(() => 'rgb(0,0,0)'));
+    const wsAmbientPreview = ref(Array.from({ length: SEGMENTS }).map(() => 'rgb(0,0,0)'));
+    let successInterval = null;
+    let failureInterval = null;
+    let ambientInterval = null;
+
+    const rgbToCss = (rgb, brightness = 1) => {
+      const [r = 0, g = 0, b = 0] = rgb;
+      const br = Math.max(0, Math.min(1, brightness));
+      return `rgb(${Math.round(r * br)}, ${Math.round(g * br)}, ${Math.round(b * br)})`;
+    };
+
+    const clearIntervalSafe = (refVar) => {
+      if (refVar) {
+        clearInterval(refVar);
+      }
+    };
+    // Start a preview effect on a given target ref array
+    // effect: 'on' | 'off' | 'glow' | 'puls' WS2813 effects
+    const startPreview = (targetRef, color, effect, intervalHolderRef) => {
+      clearIntervalSafe(intervalHolderRef.value);
+      // initial fill
+      const fillSolid = (b = 1) => {
+        for (let i = 0; i < SEGMENTS; i++) targetRef.value[i] = rgbToCss(color, b);
+      };
+
+      if (effect === 'off') {
+        for (let i = 0; i < SEGMENTS; i++) targetRef.value[i] = 'rgb(0,0,0)';
+        intervalHolderRef.value = null;
+        return;
+      }
+
+      if (effect === 'on') {
+        fillSolid(1);
+        intervalHolderRef.value = null;
+        return;
+      }
+
+      if (effect === 'puls') {
+        let phase = 0;
+        intervalHolderRef.value = setInterval(() => {
+          phase += 0.12;
+          const b = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(phase)); // 0..1
+          fillSolid(b);
+        }, 80);
+        return;
+      }
+
+      if (effect === 'glow') {
+        let head = 0;
+        intervalHolderRef.value = setInterval(() => {
+          head = (head + 1) % SEGMENTS;
+          for (let i = 0; i < SEGMENTS; i++) {
+            const dist = Math.min(Math.abs(i - head), SEGMENTS - Math.abs(i - head));
+            // close to head -> brighter
+            const b = Math.max(0.15, 1 - dist / 6);
+            targetRef.value[i] = rgbToCss(color, b);
+          }
+        }, 100);
+        return;
+      }
+      // fallback solid
+      fillSolid(1);
+    };
+
+    // Hold intervals in refs so we can clear from multiple scopes
+    const successIntervalRef = { value: null };
+    const failureIntervalRef = { value: null };
+    const ambientIntervalRef = { value: null };
+
+    const restartSuccessPreview = () => {
+      const color = actionsConfig.value.ws2813SuccessColor || [255, 255, 255];
+      const effect = actionsConfig.value.ws2813SuccessEffect || 'on';
+      startPreview(wsSuccessPreview, color, effect, successIntervalRef);
+      successInterval = successIntervalRef.value;
+    };
+
+    const restartFailurePreview = () => {
+      const color = actionsConfig.value.ws2813FailureColor || [255, 0, 0];
+      const effect = actionsConfig.value.ws2813FailureEffect || 'off';
+      startPreview(wsFailurePreview, color, effect, failureIntervalRef);
+      failureInterval = failureIntervalRef.value;
+    };
+
+    const restartAmbientPreview = () => {
+      const color = actionsConfig.value.ws2813AmbientColor || [50, 50, 50];
+      const brightness = actionsConfig.value.ws2813AmbientBrightness * 255 / 100; // 255;
+      for (let i = 0; i < SEGMENTS; i++) {
+        wsAmbientPreview.value[i] = rgbToCss(color, brightness);
+      }
+      // no effect for ambient, just solid color
+      clearIntervalSafe(ambientInterval);
+    };
+
+    const colorToIndexedArray = (rgb) => {
+      return (rgb || [0,0,0]).map((v, idx) => v);
+    };
+    
+    const sendPreview = async (which) => {
+      console.log("ws2813 preview", which);
+      try {
+        let rgb = [0,0,0];
+        if (which === 'success') rgb = actionsConfig.value.ws2813SuccessColor || [255,255,255];
+        else if (which === 'failure') rgb = actionsConfig.value.ws2813FailureColor || [255,0,0];
+        else if (which === 'ambient') rgb = actionsConfig.value.ws2813AmbientColor || [255,255,255];
+
+        const payload = {
+          ["previewcolor"]: colorToIndexedArray(rgb),
+          ["previeweffect"]: which === 'ambient' ? 'ambient' : (which === 'success' ? actionsConfig.value.ws2813SuccessEffect : actionsConfig.value.ws2813FailureEffect),
+        };
+        if ( which === 'ambient' ) {
+          payload['previewambientbrightness'] = actionsConfig.value.ws2813AmbientBrightness || 50; // 50 %
+        }
+        const url = `/preview_ws2813?preview=${encodeURIComponent(which)}`;
+        // GET with JSON body — some servers may ignore body on GET; server should accept colors via query or body.
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } catch (e) {
+        console.error('Preview request failed', e);
+      }
+    };
+
+    // Watch relevant fields to update previews live
+    watch(
+      () => [
+        actionsConfig.value.ws2813SuccessColor,
+        actionsConfig.value.ws2813SuccessEffect,
+      ],
+      restartSuccessPreview,
+      { deep: true }
+    );
+
+    watch(
+      () => [
+        actionsConfig.value.ws2813FailureColor,
+        actionsConfig.value.ws2813FailureEffect,
+      ],
+      restartFailurePreview,
+      { deep: true }
+    );
+
+    watch(
+      () => [
+        actionsConfig.value.ws2813AmbientColor,
+        actionsConfig.value.ws2813AmbientBrightness,
+      ],
+      restartAmbientPreview,
+      { deep: true }
+    );
+
+    onUnmounted(() => {
+      clearIntervalSafe(successInterval);
+      clearIntervalSafe(failureInterval);
+      clearIntervalSafe(ambientInterval);
+    });
+
+    const parseColorField = (field, length = 3) => {
+      const out = Array(length).fill(0);
+      if (!field) return out;
+
+      // Fall 1: Direktes Array [R, G, B]
+      if (Array.isArray(field) && field.length === length && typeof field[0] === 'number') {
+        return field.slice(0, length);
+      }
+
+      // Fall 2: Liste von [index, value]
+      if (Array.isArray(field)) {
+        field.forEach(item => {
+          if (Array.isArray(item) && item.length >= 2) {
+            const idx = item[0];
+            const val = item[1];
+            if (typeof idx === "number" && idx >= 0 && idx < length) {
+              out[idx] = val;
+            }
+          }
+        });
+        return out;
+      }
+
+      // Fall 3: Objekt mit Keys {R:120, G:120, B:120}
+      if (typeof field === "object") {
+        const keys = ["R", "G", "B"];
+        keys.forEach((key, idx) => {
+          if (field.hasOwnProperty(key)) {
+            out[idx] = field[key];
+          }
+        });
+        return out;
+      }
+
+      return out;
+    };
+
+
     const fetchActionsConfig = async () => {
       try {
-        const data = await fetchConfig('actions');
-
+        var hostname = window.location.hostname;
+        console.log("Hostname:", hostname);
+        var data = {}; // Mock data for testing without backend
+        if  (hostname == 'localhost' ) {
+          console.log("Running in localhost mode, using mock data");
+        } else {
+          console.log("Fetching real data from backend");
+          data = await fetchConfig('actions');
+        }
         // Transform neopixel colors from [[index, value], ...] to [R, G, B]
         const neopixelSuccessColor = Array(3).fill(0);
         if (data.neopixelSuccessColor) {
@@ -456,6 +852,16 @@ export default {
             neopixelFailureColor[item[0]] = item[1];
           });
         }
+
+        // ws2813 colors (support both [R,G,B] and [[index,value],...])
+        const ws2813SuccessColor = parseColorField(data.ws2813SuccessColor);
+        const ws2813FailureColor = parseColorField(data.ws2813FailureColor);
+        const ws2813AmbientColor = parseColorField(data.ws2813AmbientColor);
+        const ws2813AmbientBrightness = typeof data.ws2813AmbientBrightness === 'number'
+          ? data.ws2813AmbientBrightness
+          : 128;
+        const ws2813SuccessEffect = data.ws2813SuccessEffect || 'on';
+        const ws2813FailureEffect = data.ws2813FailureEffect || 'off';
 
         // Transform ethSpiConfig from array to object
         const ethSpiConfig = {
@@ -481,6 +887,15 @@ export default {
           ...data,
           neopixelSuccessColor,
           neopixelFailureColor,
+          // ws2813 mapped fields
+          ws2813SuccessColor,
+          ws2813FailureColor,
+          ws2813AmbientColor,
+          ws2813AmbientBrightness,
+          ws2813Pin: typeof data.ws2813Pin === 'number' ? data.ws2813Pin : 255,
+          ws2813NumLeds: typeof data.ws2813NumLeds === 'number' ? data.ws2813NumLeds : 24,
+          ws2813SuccessEffect,
+          ws2813FailureEffect,
           ethSpiConfig,
           ethRmiiConfig,
           // Map Simple GPIO fields
@@ -491,6 +906,10 @@ export default {
           gpioActionUnlockState: data.gpioActionUnlockState ? 1 : 0,
         };
         originalActionsConfig = JSON.parse(JSON.stringify(actionsConfig.value));
+        // start previews with loaded values
+        restartSuccessPreview();
+        restartFailurePreview();
+        restartAmbientPreview();
       } catch (e) {
         error.value = e.message;
       } finally {
@@ -499,10 +918,27 @@ export default {
     };
 
     const saveActionsConfig = async () => {
+      const rgbKeys = ['R', 'G', 'B'];
       try {
         // Transform neopixel colors from [R, G, B] to [[index, value], ...]
         const neopixelSuccessColorToSend = actionsConfig.value.neopixelSuccessColor.map((value, index) => [index, value]);
         const neopixelFailureColorToSend = actionsConfig.value.neopixelFailureColor.map((value, index) => [index, value]);
+
+        // ws2813 -> send colors as [[index,value],...] to match existing server format
+        const ws2813SuccessColorToSend = actionsConfig.value.ws2813SuccessColor;
+        const ws2813FailureColorToSend = actionsConfig.value.ws2813FailureColor;
+        const ws2813AmbientColorToSend = actionsConfig.value.ws2813AmbientColor;
+        
+        // const ws2813SuccessColorToSend = Object.fromEntries(
+        //   actionsConfig.value.ws2813SuccessColor.map((value, index) => [rgbKeys[index], value])
+        //   );
+        // const ws2813FailureColorToSend = Object.fromEntries(
+        //   actionsConfig.value.ws2813FailureColor.map((value, index) => [rgbKeys[index], value])
+        //   );
+        // const ws2813AmbientColorToSend = Object.fromEntries(
+        //   actionsConfig.value.ws2813AmbientColor.map((value, index) => [rgbKeys[index], value])
+        //   );
+
 
         // Transform ethSpiConfig from object to array
         const ethSpiConfigToSend = [
@@ -528,6 +964,15 @@ export default {
           ...actionsConfig.value,
           neopixelSuccessColor: neopixelSuccessColorToSend,
           neopixelFailureColor: neopixelFailureColorToSend,
+          // ws2813 payload
+          ws2813SuccessColor: ws2813SuccessColorToSend,
+          ws2813FailureColor: ws2813FailureColorToSend,
+          ws2813AmbientColor: ws2813AmbientColorToSend,
+          ws2813AmbientBrightness: actionsConfig.value.ws2813AmbientBrightness,
+          ws2813Pin: actionsConfig.value.ws2813Pin,
+          ws2813NumLeds: actionsConfig.value.ws2813NumLeds,
+          ws2813SuccessEffect: actionsConfig.value.ws2813SuccessEffect,
+          ws2813FailureEffect: actionsConfig.value.ws2813FailureEffect,
           ethSpiConfig: ethSpiConfigToSend,
           ethRmiiConfig: ethRmiiConfigToSend,
           // Map Simple GPIO fields
@@ -549,6 +994,10 @@ export default {
 
     const resetForm = () => {
       actionsConfig.value = JSON.parse(JSON.stringify(originalActionsConfig));
+      // restart previews after reset
+      restartSuccessPreview();
+      restartFailurePreview();
+      restartAmbientPreview();
     };
 
     onMounted(fetchActionsConfig);
@@ -559,6 +1008,11 @@ export default {
       error,
       saveActionsConfig,
       resetForm,
+      // preview bindings for template
+      wsSuccessPreview,
+      wsFailurePreview,
+      wsAmbientPreview,
+      sendPreview,
     };
   },
 };

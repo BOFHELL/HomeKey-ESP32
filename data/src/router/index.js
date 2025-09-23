@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HKInfo from '@/components/HKInfo.vue'
 import AppMqtt from '@/components/AppMqtt.vue'
-import AppActions from '@/components/AppActions.vue'
+import AppActions from '@/components/AppActions_ori.vue'
 import AppMisc from '@/components/AppMisc.vue'
 import AppOTA from '@/components/AppOTA.vue'
 
