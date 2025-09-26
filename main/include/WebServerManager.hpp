@@ -1,10 +1,19 @@
 #pragma once
-#include "ESPAsyncWebServer.h"
+#include "esp_http_server.h"
 #include "cJSON.h"
+#include "esp_timer.h"
+#include "esp_ota_ops.h"
+#include "esp_partition.h"
+#include <string>
+#include <vector>
+#include <mutex>
 
 class ConfigManager;
 class ReaderDataManager;
 class SystemManager;
+//WS2813
+class HardwareManager;
+class WsLedPixel;    
 
 /**
  * @class WebServerManager
@@ -21,7 +30,12 @@ public:
      * @param configManager Reference to the configuration manager.
      * @param readerDataManager Reference to the HomeKey reader data manager.
      */
-    WebServerManager(ConfigManager& configManager, ReaderDataManager& readerDataManager);
+    WebServerManager(ConfigManager& configManager, ReaderDataManager& readerDataManager, HardwareManager& hardwareManager);
+
+    /**
+     * @brief Destructor - cleans up OTA resources.
+     */
+    ~WebServerManager();
 
     /**
      * @brief Initializes the web server and attaches all handlers.
@@ -33,27 +47,89 @@ private:
     void setupRoutes();
 
     // --- Request Handlers ---
-    void handleGetConfig(AsyncWebServerRequest *request);
-    void handleGetEthConfig(AsyncWebServerRequest *request);
-    void handleClearConfig(AsyncWebServerRequest *request);
-    void handleSaveConfigBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
-    void processSaveConfigRequest(AsyncWebServerRequest *request);
-    void handleReboot(AsyncWebServerRequest *request);
-    void handleHKReset(AsyncWebServerRequest *request);
-    void handleWifiReset(AsyncWebServerRequest *request);
-    void handleStartConfigAP(AsyncWebServerRequest *request);
-    void handleGetWifiRssi(AsyncWebServerRequest *request);
-    void handleRootOrHash(AsyncWebServerRequest *request);
-    void handleNotFound(AsyncWebServerRequest *request);
+    static esp_err_t handleGetConfig(httpd_req_t *req);
+    static esp_err_t handleGetEthConfig(httpd_req_t *req);
+    static esp_err_t handleClearConfig(httpd_req_t *req);
+    static esp_err_t handleSaveConfig(httpd_req_t *req);
+    static esp_err_t handleReboot(httpd_req_t *req);
+    static esp_err_t handleHKReset(httpd_req_t *req);
+    static esp_err_t handleWifiReset(httpd_req_t *req);
+    static esp_err_t handleStartConfigAP(httpd_req_t *req);
+    static esp_err_t handleGetWifiRssi(httpd_req_t *req);
+    static esp_err_t handleRootOrHash(httpd_req_t *req);
+    static esp_err_t handleStaticFiles(httpd_req_t *req);
+    static esp_err_t handleNotFound(httpd_req_t *req);
+    //WS2813
+    // void handleWS2813PreviewBodyhttpd_req_t *req);
+    static esp_err_t handleWS2813Preview(httpd_req_t *req);
+    // WebSocket endpoint handler
+    static esp_err_t handleWebSocket(httpd_req_t *req);
+    // OTA endpoint handlers
+    static esp_err_t handleOTAUpload(httpd_req_t *req);
+    static esp_err_t handleOTAReboot(httpd_req_t *req);
 
     // --- Helper Methods ---
-    String indexProcessor(const String& var);
-    bool validateRequest(AsyncWebServerRequest *request, cJSON *currentData);
+    static bool validateRequest(httpd_req_t *req, cJSON *currentData, const char* body);
+    static WebServerManager* getInstance(httpd_req_t *req);
+    static esp_err_t ws_send_text(httpd_handle_t server, int fd, const char* msg, size_t len);
+    static void statusTimerCallback(void* arg){ WebServerManager* instance = static_cast<WebServerManager*>(arg); instance->broadcastToWebSocketClients(instance->getDeviceMetrics().c_str()); }
+    std::string getDeviceMetrics();
+    std::string getDeviceInfo();
+    std::string getOTAStatus();
+    void broadcastOTAStatus();
+    
+    // --- WebSocket Management ---
+    void addWebSocketClient(int fd);
+    void removeWebSocketClient(int fd);
+    void broadcastToWebSocketClients(const char* message);
+    esp_err_t handleWebSocketMessage(httpd_req_t *req, const std::string& message);
     
     // --- Member Variables ---
-    AsyncWebServer m_server;
+    httpd_handle_t m_server;
     ConfigManager& m_configManager;
     ReaderDataManager& m_readerDataManager;
+    esp_timer_handle_t m_statusTimer;
+    //WS2813
+    HardwareManager& m_hardwareManager;
+    
+    // WebSocket client management
+    std::vector<int> m_wsClients;
+    std::mutex m_wsClientsMutex;
+    
+    // OTA upload types
+    enum class OTAUploadType {
+        FIRMWARE,
+        LITTLEFS
+    };
+    
+    // OTA update management
+    esp_ota_handle_t m_otaHandle = 0;
+    const esp_partition_t* m_updatePartition = nullptr;
+    const esp_partition_t* m_littlefsPartition = nullptr;
+    size_t m_otaWrittenBytes = 0;
+    size_t m_otaTotalBytes = 0;
+    bool m_otaInProgress = false;
+    std::string m_otaError = "";
+    OTAUploadType m_currentUploadType = OTAUploadType::FIRMWARE;
+    bool m_skipReboot = false;
+    std::mutex m_otaMutex;
+    
+    // Async OTA support
+    TaskHandle_t m_otaWorkerHandle = nullptr;
+    QueueHandle_t m_otaRequestQueue = nullptr;
+    SemaphoreHandle_t m_otaWorkerReady = nullptr;
+    static void otaWorkerTask(void* parameter);
+    esp_err_t otaUploadAsync(httpd_req_t *req);
+    static esp_err_t queueOTARequest(httpd_req_t *req);
+    void initializeOTAWorker();
+    void cleanupOTAAsync();
+    
+    struct OTAAsyncRequest {
+        httpd_req_t* req;
+        size_t contentLength;
+        OTAUploadType uploadType;
+        bool skipReboot = false; // For sequential uploads
+    };
 
     static const char* TAG;
 };

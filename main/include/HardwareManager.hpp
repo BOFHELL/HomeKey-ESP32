@@ -8,6 +8,7 @@
 class ConfigManager;
 class Pixel;
 namespace espConfig { struct misc_config_t; }
+class WsLedPixel;
 
 /**
  * @class HardwareManager
@@ -18,7 +19,8 @@ namespace espConfig { struct misc_config_t; }
  * providing user feedback (e.g., blinking an LED or lighting a NeoPixel).
  */
 class HardwareManager {
-public:
+    public:
+    WsLedPixel* getWsLed();   // Getter for ws_pixel
     /**
      * @brief Constructs the HardwareManager.
      * @param configManager Reference to the application configuration manager.
@@ -67,7 +69,10 @@ private:
       PIXEL_S,
       PIXEL_F,
       ALT_GPIO,
-      ALT_GPIO_INIT
+      ALT_GPIO_INIT,
+      //WS2813
+      PIXEL_WS_S,
+      PIXEL_WS_F
     };
 
     struct TimerContext {
@@ -92,6 +97,7 @@ private:
     const espConfig::misc_config_t& m_miscConfig;
 
     Pixel* m_pixel = nullptr;
+    WsLedPixel* ws_pixel = nullptr;
   
     esp_timer_handle_t m_gpioSuccessTimer;
     esp_timer_handle_t m_gpioFailTimer;
@@ -99,6 +105,9 @@ private:
     esp_timer_handle_t m_pixelFailTimer;
     esp_timer_handle_t m_altActionTimer;
     esp_timer_handle_t m_altActionInitTimer;
+    // WS2813 Timer
+    esp_timer_handle_t ws_pixelSuccessTimer;
+    esp_timer_handle_t ws_pixelFailTimer;
 
     TaskHandle_t m_feedbackTaskHandle;
     QueueHandle_t m_feedbackQueue;

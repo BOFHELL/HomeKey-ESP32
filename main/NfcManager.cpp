@@ -49,7 +49,7 @@ bool NfcManager::begin() {
     m_pn532spi = new PN532_SPI(nfcGpioPins[0], nfcGpioPins[1], nfcGpioPins[2], nfcGpioPins[3]); 
     m_nfc = new PN532 (*m_pn532spi);
     ESP_LOGI(TAG, "Starting NFC polling task...");
-    xTaskCreateUniversal(pollingTaskEntry, "nfc_poll_task", 8192, this, 1, &m_pollingTaskHandle, 1);
+    xTaskCreateUniversal(pollingTaskEntry, "nfc_poll_task", 8192, this, 2, &m_pollingTaskHandle, 1);
     return true;
 }
 
@@ -125,7 +125,7 @@ void NfcManager::pollingTask() {
 
         uint8_t res[4];
         uint16_t resLen = 4;
-        m_nfc->inCommunicateThru(m_ecpData.data(), m_ecpData.size(), res, &resLen, 100, true);
+        m_nfc->inCommunicateThru(m_ecpData.data(), m_ecpData.size(), res, &resLen, 0, true);
 
         uint8_t *uid = new uint8_t[16];
         uint8_t *uidLen = new uint8_t[1];
