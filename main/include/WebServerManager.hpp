@@ -11,6 +11,9 @@
 class ConfigManager;
 class ReaderDataManager;
 class SystemManager;
+//WS2813
+class HardwareManager;
+class WsLedPixel;    
 
 /**
  * @class WebServerManager
@@ -27,7 +30,7 @@ public:
      * @param configManager Reference to the configuration manager.
      * @param readerDataManager Reference to the HomeKey reader data manager.
      */
-    WebServerManager(ConfigManager& configManager, ReaderDataManager& readerDataManager);
+    WebServerManager(ConfigManager& configManager, ReaderDataManager& readerDataManager, HardwareManager& hardwareManager);
 
     /**
      * @brief Destructor - cleans up OTA resources.
@@ -56,6 +59,9 @@ private:
     static esp_err_t handleRootOrHash(httpd_req_t *req);
     static esp_err_t handleStaticFiles(httpd_req_t *req);
     static esp_err_t handleNotFound(httpd_req_t *req);
+    //WS2813
+    // void handleWS2813PreviewBodyhttpd_req_t *req);
+    static esp_err_t handleWS2813Preview(httpd_req_t *req);
     // WebSocket endpoint handler
     static esp_err_t handleWebSocket(httpd_req_t *req);
     // OTA endpoint handlers
@@ -83,6 +89,8 @@ private:
     ConfigManager& m_configManager;
     ReaderDataManager& m_readerDataManager;
     esp_timer_handle_t m_statusTimer;
+    //WS2813
+    HardwareManager& m_hardwareManager;
     
     // WebSocket client management
     std::vector<int> m_wsClients;

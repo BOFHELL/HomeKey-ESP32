@@ -380,21 +380,27 @@
                 <div class="flex max-md:flex-col max-md:gap-8">
                   <div class="flex-1">
                     <h3 class="text-base md:text-md font-bold mb-2">Auth Success</h3>
-                    <div class="flex gap-2 mb-2">
+                    <div class="flex gap-4 mb-2">
                       <div class="form-control">
-                        <label class="label"><span class="label-text">R</span></label>
-                        <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[0]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                        <label class="label">
+                          <span class="label-text">R</span>
+                        </label>
+                        <input type="number"  v-model.number="actionsConfig.ws2813SuccessColor[0]" min="0" max="255"
+                          class="input input-bordered w-full" />
                       </div>
                       <div class="form-control">
                         <label class="label"><span class="label-text">G</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[1]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
                       </div>
                       <div class="form-control">
                         <label class="label"><span class="label-text">B</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[2]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
+                      </div>
+                      <div class="form-control" style="display:none"> 
+                        <input type="number" v-model.number="actionsConfig.ws2813SuccessColor[3]" min="0" max="0"
+                          class="input input-bordered w-full" />
                       </div>
                     </div>
                     <div class="form-control">
@@ -431,17 +437,21 @@
                       <div class="form-control">
                         <label class="label"><span class="label-text">R</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813FailureColor[0]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
                       </div>
                       <div class="form-control">
                         <label class="label"><span class="label-text">G</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813FailureColor[1]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
                       </div>
                       <div class="form-control">
                         <label class="label"><span class="label-text">B</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813FailureColor[2]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
+                      </div>
+                      <div class="form-control" style="display:none"> 
+                        <input type="number" v-model.number="actionsConfig.ws2813FailureColor[3]" min="0" max="0"
+                          class="input input-bordered w-full" />
                       </div>
                     </div>
                     <div class="form-control">
@@ -463,7 +473,7 @@
                              class="flex-1 h-6 rounded-sm border border-base-300"></div>
                       </div>
                       <div class="mt-2">
-                        <button type="button" class="btn btn-sm btn-outline" @click="sendPreview('failure')">
+                        <button type="button" class="btn btn-sm btn-outline" @click="sendPreview('fail')">
                           Live Preview
                         </button>
                       </div>
@@ -478,17 +488,21 @@
                       <div class="form-control">
                         <label class="label"><span class="label-text">R</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[0]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
                       </div>
                       <div class="form-control">
                         <label class="label"><span class="label-text">G</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[1]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
                       </div>
                       <div class="form-control">
                         <label class="label"><span class="label-text">B</span></label>
                         <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[2]" min="0" max="255"
-                          class="input input-bordered w-24" />
+                          class="input input-bordered w-full" />
+                      </div>
+                      <div class="form-control" style="display:none"> 
+                        <input type="number" v-model.number="actionsConfig.ws2813AmbientColor[3]" min="0" max="0"
+                          class="input input-bordered w-full" />
                       </div>
                     </div>
                     <div class="form-control">
@@ -554,9 +568,9 @@ export default {
       // ws2813 specific defaults
       ws2813Pin: 255,
       ws2813NumLeds: 24,
-      ws2813SuccessColor: [255, 255, 255],
-      ws2813FailureColor: [255, 0, 0],
-      ws2813AmbientColor: [50, 50, 50],
+      ws2813SuccessColor: [255, 255, 255, 0],
+      ws2813FailureColor: [255, 0, 0, 0],
+      ws2813AmbientColor: [50, 50, 50, 0],
       ws2813AmbientBrightness: 128,
       ws2813SuccessEffect: 'on',
       ws2813FailureEffect: 'on',
@@ -789,7 +803,7 @@ export default {
       clearIntervalSafe(ambientInterval);
     });
 
-    const parseColorField = (field, length = 3) => {
+    const parseColorField = (field, length = 4) => {
       const out = Array(length).fill(0);
       if (!field) return out;
 
@@ -833,7 +847,7 @@ export default {
         console.log("Hostname:", hostname);
         var data = {}; // Mock data for testing without backend
         if  (hostname == 'localhost' ) {
-          console.log("Running in localhost mode, using mock data");
+          console.log("Running in localhost mode, using mock data.");
         } else {
           console.log("Fetching real data from backend");
           data = await fetchConfig('actions');
@@ -888,7 +902,7 @@ export default {
           neopixelSuccessColor,
           neopixelFailureColor,
           // ws2813 mapped fields
-          ws2813SuccessColor,
+          ws2813SuccessColor ,
           ws2813FailureColor,
           ws2813AmbientColor,
           ws2813AmbientBrightness,

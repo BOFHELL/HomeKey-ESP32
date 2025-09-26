@@ -131,6 +131,8 @@ std::function<void(int)> lambda = [](int status) {
 };
 void setup() {
   Serial.begin(115200);
+  esp_log_level_set("*", ESP_LOG_DEBUG);
+
   // espp::EventManager::get().set_log_level(espp::Logger::Verbosity::DEBUG);
   readerDataManager = new ReaderDataManager;
   configManager = new ConfigManager;
@@ -139,7 +141,7 @@ void setup() {
   hardwareManager = new HardwareManager(configManager->getConfig<espConfig::misc_config_t>());
   lockManager = new LockManager(configManager->getConfig<espConfig::misc_config_t>());
   mqttManager = new MqttManager(*configManager);
-  webServerManager = new WebServerManager(*configManager, *readerDataManager);
+  webServerManager = new WebServerManager(*configManager, *readerDataManager, *hardwareManager);
   homekitLock = new HomeKitLock(lambda, *lockManager, *configManager, *readerDataManager);
   nfcManager = new NfcManager(*readerDataManager, configManager->getConfig<espConfig::misc_config_t>().nfcGpioPins);
   homekitLock->begin();

@@ -123,5 +123,23 @@ namespace espConfig
     uint8_t ethPhyType = 1;
     std::array<uint8_t, 5> ethRmiiConfig = {0, 255, 255, 255, 0};
     std::array<uint8_t, 7> ethSpiConfig = {20, 255, 255, 255, 255, 255, 255};
+    //WS2813
+    uint8_t ws2813Pin = WS2813_PIN;
+    std::array<uint8_t, 4> ws2813AmbientColor  = {WS2813_AMBIENT_R, WS2813_AMBIENT_G, WS2813_AMBIENT_B, 0};
+    std::array<uint8_t, 4> ws2813SuccessColor = {WS2813_SUCCESS_R, WS2813_SUCCESS_G, WS2813_SUCCESS_B, 0};
+    std::array<uint8_t, 4> ws2813FailureColor = {WS2813_FAIL_R, WS2813_FAIL_G, WS2813_FAIL_B, 0};
+
+    std::string ws2813SuccessEffect = WS2813_SUCCESS_EFFECT;
+    std::string ws2813FailureEffect = WS2813_FAIL_EFFECT;
+    uint8_t ws2813NumLeds = WS2813_NUM_LEDS;
+    uint8_t ws2813AmbientBrightness = WS2813_AMBIENT_BRIGHTNESS;
+    // Helper für Enum-basierten Zugriff WS2813 Stuff
+    uint8_t getColor(const std::array<uint8_t,3>& color, colorMap c) const {
+        return color[c];
+    }
+
+    std::array<uint8_t,4> getColorArray(const std::array<uint8_t,4>& color) const {
+        return color;
+    }
   };
 } // namespace espConfig

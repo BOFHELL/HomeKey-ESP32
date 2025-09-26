@@ -52,6 +52,20 @@
 #define NEOPIXEL_FAIL_B 0 // Color value for Blue - Fail HK Auth
 #define NEOPIXEL_SUCCESS_TIME 1000 // GPIO Delay time in ms - Success HK Auth
 #define NEOPIXEL_FAIL_TIME 1000 // GPIO Delay time in ms - Success HK Auth
+#define WS2813_PIN 255 // GPIO Pin used for WS2813
+#define WS2813_NUM_LEDS 24 // Number of WS2813 LEDs
+#define WS2813_SUCCESS_R 0 // Color value for Red - Success HK Auth
+#define WS2813_SUCCESS_G 255 // Color value for Green - Success HK Auth
+#define WS2813_SUCCESS_B 0 // Color value for Blue - Success HK Auth
+#define WS2813_FAIL_R 255 // Color value for Red - Fail HK Auth
+#define WS2813_FAIL_G 0 // Color value for Green - Fail HK Auth
+#define WS2813_FAIL_B 0 // Color value for Blue - Fail HK Auth
+#define WS2813_AMBIENT_BRIGHTNESS 128 // Ambient brightness for WS2813 0-255 -> 0-100% Default: 50% = 128
+#define WS2813_AMBIENT_R 120 // Color value for Red - Ambient
+#define WS2813_AMBIENT_G 120 // Color value for Green - Ambient
+#define WS2813_AMBIENT_B 120 // Color value for Blue - Ambient
+#define WS2813_SUCCESS_EFFECT "on"
+#define WS2813_FAIL_EFFECT "on"
 #define NFC_SUCCESS_PIN 255 // GPIO Pin pulled HIGH or LOW (see NFC_SUCCESS_HL) on success HK Auth
 #define NFC_SUCCESS_HL 1 // Flag to define if NFC_SUCCESS_PIN should be held High or Low
 #define NFC_SUCCESS_TIME 1000 // How long should NFC_SUCCESS_PIN be held High or Low

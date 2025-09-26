@@ -24,15 +24,24 @@
 #include "freertos/semphr.h"
 #include "esp_task_wdt.h"
 
+//WS2813
+#include "ws2813.hpp"
+#include "HardwareManager.hpp"
+
+
+
 const char* WebServerManager::TAG = "WebServerManager";
 
 // Forward declaration
 static void mergeJson(cJSON *target, cJSON *source);
 
-WebServerManager::WebServerManager(ConfigManager& configManager, ReaderDataManager& readerDataManager)
+WebServerManager::WebServerManager(ConfigManager& configManager, ReaderDataManager& readerDataManager, HardwareManager &hardwareManager)
     : m_server(nullptr),
       m_configManager(configManager),
-      m_readerDataManager(readerDataManager)
+      m_readerDataManager(readerDataManager),
+      //WS2813
+      m_hardwareManager(hardwareManager)
+
 {
   espp::EventManager::get().add_publisher("homekit/event", "WebServerManager");
   espp::EventManager::get().add_publisher("hardware/gpioPinChanged", "WebServerManager");
@@ -162,6 +171,16 @@ void WebServerManager::setupRoutes() {
     };
     httpd_register_uri_handler(m_server, &config_save_uri);
 
+    //WS2813
+    httpd_uri_t ws2813_preview_uri = {
+        .uri       = "/preview_ws2813",
+        .method    = HTTP_POST,
+        .handler   = handleWS2813Preview,
+        .user_ctx  = this
+    };
+    httpd_register_uri_handler(m_server, &ws2813_preview_uri);
+
+    // <-!/ENDE WS2813 -->
     httpd_uri_t eth_config_uri = {
         .uri       = "/eth_get_config",
         .method    = HTTP_GET,
@@ -555,6 +574,154 @@ esp_err_t WebServerManager::handleGetEthConfig(httpd_req_t *req) {
     httpd_resp_send(req, payload, strlen(payload));
     free(payload);
     return ESP_OK;
+}
+
+//WS2813
+esp_err_t WebServerManager::handleWS2813Preview(httpd_req_t *req)
+{
+    WebServerManager* instance = getInstance(req);
+    if (!instance) {
+        httpd_resp_send_500(req);
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "Handling WS2813 Preview Request");
+    // ESP_LOGI(TAG, "Json Data in Temp Object: %p", request->_tempObject);
+
+    if (instance->m_configManager.getConfig<espConfig::misc_config_t>().ws2813Pin == 255)
+    {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "WS2813 is not configured.", HTTPD_RESP_USE_STRLEN);
+        return ESP_FAIL;
+    }
+
+    // save in variables
+    uint8_t red  = 0; uint8_t green = 0; uint8_t blue  = 0;
+    uint8_t brightness = 128; // default
+
+    // Querystring holen
+    char query[128];
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) != ESP_OK) {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "Missing query string", HTTPD_RESP_USE_STRLEN);
+        return ESP_OK;
+    }
+    ESP_LOGI(TAG, "Query: %s", query);
+
+    char preview_param[64];
+    if (httpd_query_key_value(query, "preview", preview_param, sizeof(preview_param)) != ESP_OK) {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "Missing 'preview' parameter", HTTPD_RESP_USE_STRLEN);
+        return ESP_OK;
+    }
+    ESP_LOGI(TAG, "Preview value: %s", preview_param);
+
+    if (strcmp(preview_param, "fail") != 0 &&
+        strcmp(preview_param, "success") != 0 &&
+        strcmp(preview_param, "ambient") != 0) {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "Invalid 'preview' value", HTTPD_RESP_USE_STRLEN);
+        return ESP_OK;
+    }
+
+    ESP_LOGI(TAG, "nect ");
+
+    // Read request body
+    char content[2048];
+    int ret = httpd_req_recv(req, content, sizeof(content) - 1);
+    if (ret <= 0) {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "Invalid request body", HTTPD_RESP_USE_STRLEN);
+        return ESP_FAIL;
+    }
+    content[ret] = '\0';
+    ESP_LOGI(TAG, "Inhalt vom content: %s ",content);
+
+    cJSON *obj = cJSON_Parse(content);
+    if (!obj) {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "Invalid JSON", HTTPD_RESP_USE_STRLEN);
+        return ESP_FAIL;
+    }    
+
+    cJSON *color = cJSON_GetObjectItem(obj, "previewcolor");
+    cJSON *previeweffect = cJSON_GetObjectItem(obj, "previeweffect");
+  
+    if (cJSON_HasObjectItem(obj, "previewambientbrightness")) {
+        cJSON *previewambientbrightness = cJSON_GetObjectItem(obj, "previewambientbrightness");
+        if (cJSON_IsNumber(previewambientbrightness)) {
+            brightness = previewambientbrightness->valueint > 100 ? 100 : previewambientbrightness->valueint;
+            ESP_LOGI(TAG, "Setting ambient brightness to %d%%", brightness);
+            // if ( m_hardwareManager.getWsLed() != nullptr) {
+            //     m_hardwareManager.getWsLed()->setAmbientBrightness(brightness);
+            // }
+        }
+    }
+    if (!cJSON_IsArray(color) || !cJSON_IsString(previeweffect))
+    {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "JSON 'previewcolor' must be an array and 'previeweffect' must be a string", HTTPD_RESP_USE_STRLEN);
+        return ESP_FAIL;
+        // cJSON_Delete(json);
+    }
+
+    // Erwartet: [R, G, B]
+
+    cJSON *r = cJSON_GetArrayItem(color, 0);
+    cJSON *g = cJSON_GetArrayItem(color, 1);
+    cJSON *b = cJSON_GetArrayItem(color, 2);
+
+
+  
+    if (cJSON_IsNumber(r) && cJSON_IsNumber(g) && cJSON_IsNumber(b)) {
+        red   = r->valueint > 255 ? 255 : r->valueint;
+        green = g->valueint > 255 ? 255 : g->valueint;
+        blue  = b->valueint > 255 ? 255 : b->valueint;
+
+        ESP_LOGI(TAG, "RGB: %d, %d, %d", red, green, blue);
+    }
+
+    if ( instance->m_hardwareManager.getWsLed() == nullptr) {
+        //  m_hardwareManager.ws_pixel = new WsLedPixel(m_configManager.getConfig<espConfig::misc_config_t>().ws2813Pin, "GRB");
+        ESP_LOGI(TAG, "Created new WsLedPixel instance");
+        return ESP_FAIL;
+    } 
+  
+  // switch effect
+    std::string effect = previeweffect->valuestring;
+    std::transform(effect.begin(), effect.end(), effect.begin(),
+                [](unsigned char c){ return std::tolower(c); });
+                
+    ESP_LOGI(TAG, "Effect: %s", effect.c_str());
+    if (effect == "on") {
+        ESP_LOGI(TAG, "Starting ON preview");
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::ON, red, green, blue, 1000, 6000, (float)brightness);
+    } else if (effect == "off") {
+        ESP_LOGI(TAG, "Starting OFF preview");
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::OFF, red, green, blue, 1000, 6000);
+    } else if (effect == "glow") {
+        ESP_LOGI(TAG, "Starting GLOW preview");
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::GLOW, red, green, blue, 1000, 6000);
+    } else if (effect == "puls") {
+        ESP_LOGI(TAG, "Starting PULS preview");
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::PULS, red, green, blue, 1000, 6000);
+    } else if (effect == "rainbow") {
+        ESP_LOGI(TAG, "Starting RAINBOW preview");
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::RAINBOW, red, green, blue, 1000, 6000);
+    } else if (effect == "moving_spots") {
+        ESP_LOGI(TAG, "Starting MOVING_SPOTS preview");
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::MOVING_SPOTS, red, green, blue, 1000, 6000);
+    } else if (effect == "ambient") {
+        ESP_LOGI(TAG, "Starting AMBIENT preview with brightness %d%%", brightness);
+        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::AMBIENT, red, green, blue, 1000, 6000, (float)brightness);
+    } else {
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_send(req, "Invalid 'previeweffect' parameter.", HTTPD_RESP_USE_STRLEN);
+        return ESP_FAIL;
+    };
+    httpd_resp_set_status(req, "200 OK");
+    httpd_resp_send(req, "WS2813 updated.", HTTPD_RESP_USE_STRLEN);
+    return ESP_OK; 
 }
 
 // Save configuration handler

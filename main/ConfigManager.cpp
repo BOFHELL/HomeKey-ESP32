@@ -84,7 +84,17 @@ ConfigManager::ConfigManager() : m_isInitialized(false) {
       {"ethActivePreset", &m_miscConfig.ethActivePreset},
       {"ethPhyType", &m_miscConfig.ethPhyType},
       {"ethRmiiConfig", &m_miscConfig.ethRmiiConfig},
-      {"ethSpiConfig", &m_miscConfig.ethSpiConfig}}
+      {"ethSpiConfig", &m_miscConfig.ethSpiConfig},
+      //WS2813
+      {"ws2813Pin", &m_miscConfig.ws2813Pin},
+      {"ws2813NumLeds", &m_miscConfig.ws2813NumLeds},
+      {"ws2813SuccessEffect", &m_miscConfig.ws2813SuccessEffect},
+      {"ws2813FailureEffect", &m_miscConfig.ws2813FailureEffect},
+      {"ws2813AmbientBrightness", &m_miscConfig.ws2813AmbientBrightness},
+      {"ws2813AmbientColor", &m_miscConfig.ws2813AmbientColor},
+      {"ws2813SuccessColor", &m_miscConfig.ws2813SuccessColor},
+      {"ws2813FailureColor", &m_miscConfig.ws2813FailureColor}
+    }
     }
   };
 }
