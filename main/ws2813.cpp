@@ -64,7 +64,7 @@ void WsLedPixel::startPreview(LedEffect effect, uint8_t r, uint8_t g, uint8_t b,
     m_r = r; m_g = g; m_b = b;
     m_speed = speed;
     m_previewDuration = durationMs;
-    m_ambientBrightness = brightness; // nur für Ambient relevant
+    //m_ambientBrightness = brightness; // nur für Ambient relevant
     // Dauerbetrieb pausieren
     m_paused = true;
 
@@ -95,6 +95,8 @@ void WsLedPixel::previewLoop() {
             case LedEffect::AMBIENT: ambient(); break;
             default: break;
         }
+        ESP_LOGI("WsLedPixel", "Preview running... %d ms left", (int)(m_previewDuration - ((esp_timer_get_time() / 1000ULL) - start)));
+
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 
@@ -163,6 +165,8 @@ void WsLedPixel::movingSpots() {
 }
 
 void WsLedPixel::ambient() {
+
+    //TODO: Keine farbe ?!
     // RGB-Farbwert mit Brightness skalieren
     float factor = std::clamp(m_ambientBrightness / 100.0f, 0.0f, 1.0f);
     Color c = RGB((int)(m_ambientR * factor),

@@ -597,7 +597,7 @@ esp_err_t WebServerManager::handleWS2813Preview(httpd_req_t *req)
 
     // save in variables
     uint8_t red  = 0; uint8_t green = 0; uint8_t blue  = 0;
-    uint8_t brightness = 128; // default
+    uint8_t brightness = 50; // 50%
 
     // Querystring holen
     char query[128];

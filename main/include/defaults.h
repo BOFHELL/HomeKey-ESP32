@@ -64,8 +64,8 @@
 #define WS2813_AMBIENT_R 120 // Color value for Red - Ambient
 #define WS2813_AMBIENT_G 120 // Color value for Green - Ambient
 #define WS2813_AMBIENT_B 120 // Color value for Blue - Ambient
-#define WS2813_SUCCESS_EFFECT "on"
-#define WS2813_FAIL_EFFECT "on"
+#define WS2813_SUCCESS_EFFECT 3 // Effect on success HK Auth: 0=OFF, 1=ON, 2=GLOW, 3=PULS, 4=RAINBOW, 5=MOVING_SPOTS, 6=AMBIENT
+#define WS2813_FAIL_EFFECT 1 // Effect on fail HK Auth: 0=OFF, 1=ON, 2=GLOW, 3=PULS, 4=RAINBOW, 5=MOVING_SPOTS, 6=AMBIENT
 #define NFC_SUCCESS_PIN 255 // GPIO Pin pulled HIGH or LOW (see NFC_SUCCESS_HL) on success HK Auth
 #define NFC_SUCCESS_HL 1 // Flag to define if NFC_SUCCESS_PIN should be held High or Low
 #define NFC_SUCCESS_TIME 1000 // How long should NFC_SUCCESS_PIN be held High or Low

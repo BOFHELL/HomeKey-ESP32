@@ -129,8 +129,8 @@ namespace espConfig
     std::array<uint8_t, 4> ws2813SuccessColor = {WS2813_SUCCESS_R, WS2813_SUCCESS_G, WS2813_SUCCESS_B, 0};
     std::array<uint8_t, 4> ws2813FailureColor = {WS2813_FAIL_R, WS2813_FAIL_G, WS2813_FAIL_B, 0};
 
-    std::string ws2813SuccessEffect = WS2813_SUCCESS_EFFECT;
-    std::string ws2813FailureEffect = WS2813_FAIL_EFFECT;
+    uint8_t ws2813SuccessEffect = WS2813_SUCCESS_EFFECT;
+    uint8_t ws2813FailureEffect = WS2813_FAIL_EFFECT;
     uint8_t ws2813NumLeds = WS2813_NUM_LEDS;
     uint8_t ws2813AmbientBrightness = WS2813_AMBIENT_BRIGHTNESS;
     // Helper für Enum-basierten Zugriff WS2813 Stuff

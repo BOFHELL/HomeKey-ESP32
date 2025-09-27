@@ -143,14 +143,14 @@ void HardwareManager::begin()
     ws_pixel = new WsLedPixel(this, m_miscConfig.ws2813Pin, pixelTypeMap[ws28143pixelTypeIndex], m_miscConfig.ws2813NumLeds);
 
     auto amb = m_miscConfig.getColorArray(m_miscConfig.ws2813AmbientColor);
-    ESP_LOGI(TAG, "ws2813 ambient color (%d,%d,%d) and brightness %f",
+    ESP_LOGI(TAG, "ws2813 ambient color (%d,%d,%d) and brightness %d",
              amb[espConfig::misc_config_t::R],
              amb[espConfig::misc_config_t::G],
              amb[espConfig::misc_config_t::B],
              m_miscConfig.ws2813AmbientBrightness);//TODO: Speichert de wert falsch weg. -> s2813 ambient color (180,180,180) and brightness 1.768814.  waren glaub ich 5%
     ws_pixel->setEffect(LedEffect::AMBIENT,
                         amb[espConfig::misc_config_t::R], amb[espConfig::misc_config_t::G], amb[espConfig::misc_config_t::B],
-                        m_miscConfig.ws2813AmbientBrightness);
+                        1000.0, m_miscConfig.ws2813AmbientBrightness);
     ws_pixel->startTask();
   }
 
@@ -289,7 +289,11 @@ void HardwareManager::handleTimer(void *arg)
     if (i->ws_pixel != nullptr)
     {
       i->ws_pixel->off();
-      // TODO: set effect fail|sucess
+      // reset ambiente
+      auto amb = i->m_miscConfig.getColorArray(i->m_miscConfig.ws2813AmbientColor);
+      i->ws_pixel->setEffect(LedEffect::AMBIENT,
+                        amb[espConfig::misc_config_t::R], amb[espConfig::misc_config_t::G], amb[espConfig::misc_config_t::B],
+                        1000.0, (float)i->m_miscConfig.ws2813AmbientBrightness);
     }
     break;
   }
@@ -414,6 +418,26 @@ void HardwareManager::feedbackTask()
           //  auto color = m_miscConfig.ws2813SuccessColor;
           //  ws_pixel->set(ws_pixel->RGB(color[espConfig::misc_config_t::R], color[espConfig::misc_config_t::G], color[espConfig::misc_config_t::B]), m_miscConfig.ws2813NumLeds);
           //  start successtimer , timeout from neopixel
+          auto color = m_miscConfig.getColorArray(m_miscConfig.ws2813SuccessColor);
+          int red = color[espConfig::misc_config_t::R];
+          int green = color[espConfig::misc_config_t::G];
+          int blue = color[espConfig::misc_config_t::B];
+          int brightness = 50.0f;// TODO: maybe user brightness? m_miscConfig.ws2813SuccessBrightness;
+          LedEffect effect = static_cast<LedEffect>(m_miscConfig.ws2813SuccessEffect);
+          switch (effect) {
+            case LedEffect::ON:
+            case LedEffect::OFF:
+            case LedEffect::GLOW:
+            case LedEffect::PULS:
+            case LedEffect::RAINBOW:
+            case LedEffect::MOVING_SPOTS:
+              ws_pixel->setEffect(static_cast<LedEffect>(effect), red, green, blue, 1000.0, (float)brightness);
+              break;
+            default:
+              ESP_LOGI(TAG, "No valid effect for WS2813 success feedback.");
+            // nix
+          }
+         //- timout reset effect by neopxelseuccesstimer * 10000 // 
           esp_timer_start_once(ws_pixelSuccessTimer, m_miscConfig.neopixelSuccessTime * 1000);
         }
         if (m_miscConfig.nfcSuccessPin != 255)
@@ -437,16 +461,31 @@ void HardwareManager::feedbackTask()
 
           esp_timer_start_once(m_pixelFailTimer, m_miscConfig.neopixelFailTime * 1000);
         }
-        // WS2813 NFC Failed
+        // WS2813
         if (ws_pixel != nullptr)
         {
-          // TODO::  ws2813
-          //  auto failc = espConfig::misc_config_t::getColorArray(m_miscConfig.ws2813FailureColor);
-          //      ws_pixel->setEffect(LedEffect::AMBIENT,
-          //  amb[0], amb[1], amb[2],
-          //  m_miscConfig.ws2813AmbientBrightness);
+          auto color = m_miscConfig.getColorArray(m_miscConfig.ws2813FailureColor);
+          int red = color[espConfig::misc_config_t::R];
+          int green = color[espConfig::misc_config_t::G];
+          int blue = color[espConfig::misc_config_t::B];
+          int brightness = 50.0f;// TODO: maybe user brightness? m_miscConfig.ws2813FailureBrightness;
+          LedEffect effect = static_cast<LedEffect>(m_miscConfig.ws2813FailureEffect);
+          switch (effect) {
+            case LedEffect::ON:
+            case LedEffect::OFF:
+            case LedEffect::GLOW:
+            case LedEffect::PULS:
+            case LedEffect::RAINBOW:
+            case LedEffect::MOVING_SPOTS:
+              ws_pixel->setEffect(static_cast<LedEffect>(effect), red, green, blue, 1000, (float)brightness);
+              break;
+            default:
+              ESP_LOGI(TAG, "No valid effect for WS2813 success feedback.");
+          
+            // nix
+          } 
           esp_timer_start_once(ws_pixelFailTimer, m_miscConfig.neopixelFailTime * 1000);
-        }
+        } // fi ws_pixel
         if (m_miscConfig.nfcFailPin != 255)
         {
           digitalWrite(m_miscConfig.nfcFailPin, m_miscConfig.nfcFailHL);
