@@ -657,7 +657,7 @@ esp_err_t WebServerManager::handleWS2813Preview(httpd_req_t *req)
             // }
         }
     }
-    if (!cJSON_IsArray(color) || !cJSON_IsString(previeweffect))
+    if (!cJSON_IsArray(color) || !cJSON_IsNumber(previeweffect))
     {
         httpd_resp_set_status(req, "400 Bad Request");
         httpd_resp_send(req, "JSON 'previewcolor' must be an array and 'previeweffect' must be a string", HTTPD_RESP_USE_STRLEN);
@@ -687,38 +687,85 @@ esp_err_t WebServerManager::handleWS2813Preview(httpd_req_t *req)
         return ESP_FAIL;
     } 
   
-  // switch effect
-    std::string effect = previeweffect->valuestring;
-    std::transform(effect.begin(), effect.end(), effect.begin(),
-                [](unsigned char c){ return std::tolower(c); });
-                
-    ESP_LOGI(TAG, "Effect: %s", effect.c_str());
-    if (effect == "on") {
-        ESP_LOGI(TAG, "Starting ON preview");
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::ON, red, green, blue, 1000, 6000, (float)brightness);
-    } else if (effect == "off") {
-        ESP_LOGI(TAG, "Starting OFF preview");
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::OFF, red, green, blue, 1000, 6000);
-    } else if (effect == "glow") {
-        ESP_LOGI(TAG, "Starting GLOW preview");
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::GLOW, red, green, blue, 1000, 6000);
-    } else if (effect == "puls") {
-        ESP_LOGI(TAG, "Starting PULS preview");
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::PULS, red, green, blue, 1000, 6000);
-    } else if (effect == "rainbow") {
-        ESP_LOGI(TAG, "Starting RAINBOW preview");
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::RAINBOW, red, green, blue, 1000, 6000);
-    } else if (effect == "moving_spots") {
-        ESP_LOGI(TAG, "Starting MOVING_SPOTS preview");
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::MOVING_SPOTS, red, green, blue, 1000, 6000);
-    } else if (effect == "ambient") {
-        ESP_LOGI(TAG, "Starting AMBIENT preview with brightness %d%%", brightness);
-        instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::AMBIENT, red, green, blue, 1000, 6000, (float)brightness);
-    } else {
-        httpd_resp_set_status(req, "400 Bad Request");
-        httpd_resp_send(req, "Invalid 'previeweffect' parameter.", HTTPD_RESP_USE_STRLEN);
-        return ESP_FAIL;
-    };
+    // switch effect
+    //Previeweffect interger read
+    LedEffect effectType = static_cast<LedEffect>(previeweffect->valueint);
+    ESP_LOGI(TAG, "Effect Type: %d", static_cast<int>(effectType));
+
+    
+    switch (effectType) {   
+        case LedEffect::ON:
+        case LedEffect::OFF:
+        case LedEffect::GLOW:
+        case LedEffect::PULS:
+        case LedEffect::RAINBOW:
+        case LedEffect::MOVING_SPOTS:
+            ESP_LOGI(TAG, "Starting preview");
+            instance->m_hardwareManager.getWsLed()->startPreview(effectType, red, green, blue, 1000, 6000);
+            break;
+        case LedEffect::AMBIENT:
+            ESP_LOGI(TAG, "Starting AMBIENT preview with brightness %d%%", brightness);
+            instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::AMBIENT, red, green, blue, 1000, 6000, (float)brightness);
+            break;
+        // LedEffect::ON:
+        
+        // LedEffect::OFF:
+        //     ESP_LOGI(TAG, "Starting OFF preview");
+        //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::OFF, red, green, blue, 1000, 6000);
+        //     break;
+        // LedEffect::GLOW:
+        //     ESP_LOGI(TAG, "Starting GLOW preview");
+        //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::GLOW, red, green, blue, 1000, 6000);
+        //     break;
+        // LedEffect::PULS:
+        //     ESP_LOGI(TAG, "Starting PULS preview");
+        //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::PULS, red, green, blue, 1000, 6000);
+        //     break;
+        // LedEffect::RAINBOW:
+        //     ESP_LOGI(TAG, "Starting RAINBOW preview");
+        //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::RAINBOW, red, green, blue, 1000, 6000);
+        //     break;
+        // LedEffect::MOVING_SPOTS:
+        //     ESP_LOGI(TAG, "Starting MOVING_SPOTS preview");
+        //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::MOVING_SPOTS, red, green, blue, 1000, 6000);
+        //     break;
+        // LedEffect::AMBIENT:
+        //     ESP_LOGI(TAG, "Starting AMBIENT preview with brightness %d%%", brightness);
+        //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::AMBIENT, red, green, blue, 1000, 6000, (float)brightness);
+        //     break;
+        default:
+            httpd_resp_set_status(req, "400 Bad Request");
+            httpd_resp_send(req, "Invalid 'previeweffect' parameter.", HTTPD_RESP_USE_STRLEN);
+            return ESP_OK;
+            break;
+    } //esac
+
+    // if (effect == "on") {
+    //     ESP_LOGI(TAG, "Starting ON preview");
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::ON, red, green, blue, 1000, 6000, (float)brightness);
+    // } else if (effect == "off") {
+    //     ESP_LOGI(TAG, "Starting OFF preview");
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::OFF, red, green, blue, 1000, 6000);
+    // } else if (effect == "glow") {
+    //     ESP_LOGI(TAG, "Starting GLOW preview");
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::GLOW, red, green, blue, 1000, 6000);
+    // } else if (effect == "puls") {
+    //     ESP_LOGI(TAG, "Starting PULS preview");
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::PULS, red, green, blue, 1000, 6000);
+    // } else if (effect == "rainbow") {
+    //     ESP_LOGI(TAG, "Starting RAINBOW preview");
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::RAINBOW, red, green, blue, 1000, 6000);
+    // } else if (effect == "moving_spots") {
+    //     ESP_LOGI(TAG, "Starting MOVING_SPOTS preview");
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::MOVING_SPOTS, red, green, blue, 1000, 6000);
+    // } else if (effect == "ambient") {
+    //     ESP_LOGI(TAG, "Starting AMBIENT preview with brightness %d%%", brightness);
+    //     instance->m_hardwareManager.getWsLed()->startPreview(LedEffect::AMBIENT, red, green, blue, 1000, 6000, (float)brightness);
+    // } else {
+    //     httpd_resp_set_status(req, "400 Bad Request");
+    //     httpd_resp_send(req, "Invalid 'previeweffect' parameter.", HTTPD_RESP_USE_STRLEN);
+    //     return ESP_FAIL;
+    
     httpd_resp_set_status(req, "200 OK");
     httpd_resp_send(req, "WS2813 updated.", HTTPD_RESP_USE_STRLEN);
     return ESP_OK; 

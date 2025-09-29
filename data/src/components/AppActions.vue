@@ -405,13 +405,13 @@
                     </div>
                     <div class="form-control">
                       <label class="label"><span class="label-text">Effect</span></label>
-                      <select v-model="actionsConfig.ws2813SuccessEffect" class="select select-bordered w-full">
-                        <option value="on">an</option>
-                        <option value="off">aus</option>
-                        <option value="glow">glow</option>
-                        <option value="puls">puls</option>
-                        <option value="rainbow">rainbow</option>
-                        <option value="moving_spots">moving_spots</option>
+                      <select v-model.number="actionsConfig.ws2813SuccessEffect" class="select select-bordered w-full">
+                        <option value="1">aus</option>
+                        <option value="2">an</option>
+                        <option value="3">glow</option>
+                        <option value="4">puls</option>
+                        <option value="5">rainbow</option>
+                        <option value="6">moving_spots</option>
                       </select>
                     </div>
 
@@ -456,11 +456,13 @@
                     </div>
                     <div class="form-control">
                       <label class="label"><span class="label-text">Effect</span></label>
-                      <select v-model="actionsConfig.ws2813FailureEffect" class="select select-bordered w-full">
-                        <option value="on">an</option>
-                        <option value="off">aus</option>
-                        <option value="glow">glow</option>
-                        <option value="puls">puls</option>
+                      <select v-model.number="actionsConfig.ws2813FailureEffect" class="select select-bordered w-full">
+                        <option value="1">aus</option>
+                        <option value="2">an</option>
+                        <option value="3">glow</option>
+                        <option value="4">puls</option>
+                        <option value="5">rainbow</option>
+                        <option value="6">moving_spots</option>
                       </select>
                     </div>
 
@@ -572,8 +574,8 @@ export default {
       ws2813FailureColor: [255, 0, 0, 0],
       ws2813AmbientColor: [50, 50, 50, 0],
       ws2813AmbientBrightness: 128,
-      ws2813SuccessEffect: 'on',
-      ws2813FailureEffect: 'on',
+      ws2813SuccessEffect: 3, // glow
+      ws2813FailureEffect: 2, // on
       // Simple GPIO fields - mapped from NFC API names
       nfcSuccessPin: 2,
       nfcSuccessTime: 1000,
@@ -716,14 +718,14 @@ export default {
 
     const restartSuccessPreview = () => {
       const color = actionsConfig.value.ws2813SuccessColor || [255, 255, 255];
-      const effect = actionsConfig.value.ws2813SuccessEffect || 'on';
+      const effect = actionsConfig.value.ws2813SuccessEffect || 2; // on
       startPreview(wsSuccessPreview, color, effect, successIntervalRef);
       successInterval = successIntervalRef.value;
     };
 
     const restartFailurePreview = () => {
       const color = actionsConfig.value.ws2813FailureColor || [255, 0, 0];
-      const effect = actionsConfig.value.ws2813FailureEffect || 'off';
+      const effect = actionsConfig.value.ws2813FailureEffect || 1; // off
       startPreview(wsFailurePreview, color, effect, failureIntervalRef);
       failureInterval = failureIntervalRef.value;
     };
@@ -874,9 +876,9 @@ export default {
         const ws2813AmbientBrightness = typeof data.ws2813AmbientBrightness === 'number'
           ? data.ws2813AmbientBrightness
           : 128;
-        const ws2813SuccessEffect = data.ws2813SuccessEffect || 'on';
-        const ws2813FailureEffect = data.ws2813FailureEffect || 'off';
-
+        const ws2813SuccessEffect = data.ws2813SuccessEffect || 2; // on 
+        const ws2813FailureEffect = data.ws2813FailureEffect || 1; // off
+  
         // Transform ethSpiConfig from array to object
         const ethSpiConfig = {
           spi_freq_mhz: data.ethSpiConfig ? data.ethSpiConfig[0] : 0,

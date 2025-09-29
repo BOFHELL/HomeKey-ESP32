@@ -3,18 +3,19 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <vector>
+#include <algorithm> // für std::clamp
 
 class HardwareManager; // Forward declaration
 
 enum class LedEffect {
-    NONE,
-    OFF,
-    ON,
-    GLOW,
-    PULS,
-    RAINBOW,
-    MOVING_SPOTS,
-    AMBIENT
+    NONE,           // 0
+    OFF,            // 1
+    ON,             // 2
+    GLOW,           // 3
+    PULS,           // 4
+    RAINBOW,        // 5
+    MOVING_SPOTS,   // 6
+    AMBIENT         // 7
 };
 
 class WsLedPixel : public Pixel {
@@ -36,7 +37,7 @@ public:
                       uint8_t r, uint8_t g, uint8_t b,
                       float speed,
                       uint32_t durationMs = 6000,
-                      float brightness=50.0f); // 50% default
+                      float brightness=80.0f); // 50% default
 
     // Grundfunktionen
     void rainbow(uint8_t hueOffset, uint8_t sat = 255, uint8_t val = 255);
@@ -48,7 +49,11 @@ public:
     void movingSpots();
     void ambient();
 
+    // Globale Helligkeit
+    void setBrightness(float percent);
 private:
+    void show(); // skaliert Buffer mit m_brightness und setzt LEDs
+
     // Dauerbetrieb
     static void taskEntry(void* pvParameter);
     void taskLoop();
@@ -76,4 +81,13 @@ private:
     uint8_t m_ambientG = 0;
     uint8_t m_ambientB = 0;
     float   m_ambientBrightness = 80.0f; // Prozent
+    // temporäre Speicherung für Preview
+    uint8_t m_prevAmbientR = 0;
+    uint8_t m_prevAmbientG = 0;
+    uint8_t m_prevAmbientB = 0;
+    float   m_prevAmbientBrightness = 80.0f; // Prozent
+    
+    
+    // Globale Helligkeit
+    float m_brightness;
 };
